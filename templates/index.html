@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fraud Detection Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+        }
+
+        /* Background */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: url("{{ url_for('static', filename='img2.jpg') }}") no-repeat center center/cover;
+            filter: blur(8px) brightness(0.6);
+            transform: scale(1.1);
+            z-index: -1;
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(0,0,0,0.6);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .left {
+            width: 35%;
+        }
+
+        .right {
+            width: 65%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        input, select {
+            width: 90%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #00c6ff;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0072ff;
+        }
+
+        .result-box {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .safe {
+            background: #28a745;
+        }
+
+        .fraud {
+            background: #dc3545;
+        }
+
+        .analysis-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .insights {
+            flex: 1;
+        }
+
+        .insights ul {
+            padding-left: 20px;
+        }
+
+        .insights li {
+            margin-bottom: 8px;
+        }
+
+        .chart-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chart-container canvas {
+            max-width: 350px;
+            max-height: 220px;
+        }
+
+        .panel {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- LEFT PANEL -->
+    <div class="panel left">
+        <h2>Transaction Input</h2>
+
+        <form method="POST">
+            <input type="number" name="step" placeholder="Transaction Hour" required>
+
+            <select name="type">
+                <option value="CASH_IN">Cash In</option>
+                <option value="CASH_OUT">Cash Out</option>
+                <option value="DEBIT">Debit</option>
+                <option value="PAYMENT">Payment</option>
+                <option value="TRANSFER">Transfer</option>
+            </select>
+
+            <input type="number" name="amount" placeholder="Amount" required>
+            <input type="number" name="oldbalanceOrg" placeholder="Sender Old Balance" required>
+            <input type="number" name="newbalanceOrig" placeholder="Sender New Balance" required>
+            <input type="number" name="oldbalanceDest" placeholder="Receiver Old Balance" required>
+            <input type="number" name="newbalanceDest" placeholder="Receiver New Balance" required>
+
+            <button type="submit">Analyze</button>
+        </form>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel right">
+        <h2>Fraud Analysis</h2>
+
+        <a href="/history" style="text-decoration:none;">
+            <div style="background:#00c6ff; padding:10px; text-align:center; border-radius:6px;">
+                View Full History
+            </div>
+        </a>
+
+        {% if not result %}
+            <p style="text-align:center;">Enter transaction details to analyze fraud risk.</p>
+        {% endif %}
+
+        {% if result %}
+        <div class="result-box {{ status_class }}">
+            <h3>{{ result }}</h3>
+            <p>Fraud Probability: {{ probability }}%</p>
+        </div>
+
+        <!-- NEW FLEX CONTAINER -->
+        <div class="analysis-section">
+
+            <!-- LEFT: INSIGHTS -->
+            <div class="insights">
+                <h3>Fraud Insights</h3>
+
+                {% if reasons %}
+                    <ul>
+                        {% for r in reasons %}
+                            <li>{{ r }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Transaction appears normal with no major fraud indicators.</p>
+                {% endif %}
+            </div>
+
+            <!-- RIGHT: CHART -->
+            <div class="chart-container">
+                <canvas id="fraudChart"></canvas>
+            </div>
+
+        </div>
+
+            <script>
+            var ctx = document.getElementById('fraudChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Safe', 'Fraud'],
+                    datasets: [{
+                        label: 'Probability',
+                        data: [{{ safe_prob }}, {{ probability }}],
+                        backgroundColor: ['#28a745', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+            </script>
+
+        {% endif %}
+    </div>
+
+</div>
+
+</body>
+</html>

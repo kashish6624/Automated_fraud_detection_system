@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transaction History</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #111;
+            color: white;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            color: black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        a {
+            color: #00c6ff;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Transaction History</h2>
+
+<a href="/">⬅ Back to Dashboard</a>
+
+<br><br>
+
+{{ tables|safe }}
+
+</body>
+</html>
