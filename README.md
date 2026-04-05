@@ -4,7 +4,7 @@ A Machine Learning web application that detects **fraudulent financial transacti
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 This project predicts whether a transaction is **Fraudulent** or **Safe** based on transaction details such as amount, balances, and transaction type.
 
